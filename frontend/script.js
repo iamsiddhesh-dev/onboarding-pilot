@@ -40,7 +40,23 @@ function makeTag(value) {
 // ---------- Mode toggle ----------
 
 function setMode(mode) {
+  const isActualSwitch = state.mode !== mode;
   state.mode = mode;
+
+  // Before and After are two independent demos of the same scenario — carrying
+  // selections across the toggle would let Before-mode duplicates (allowed by
+  // design) slip into an After-mode save. Reset everything except the pasted
+  // resume text, which is annoying to have to re-type when comparing modes.
+  if (isActualSwitch) {
+    state.industries = [];
+    state.jobTitles = [];
+    state.skills = [];
+    state.yearsExperience = null;
+    document.getElementById('name-input').value = '';
+    document.getElementById('years-input').value = '';
+    document.getElementById('autofill-status').textContent = '';
+    document.getElementById('save-status').textContent = '';
+  }
 
   document.body.classList.toggle('mode-before', mode === 'before');
   document.body.classList.toggle('mode-after', mode === 'after');
@@ -239,6 +255,7 @@ async function submitAutofill() {
     (data.job_titles || []).forEach((value) => addJobTitleSelection(value));
     (data.skills || []).forEach((value) => addSkill(value));
     state.yearsExperience = data.years_experience ?? null;
+    document.getElementById('years-input').value = state.yearsExperience ?? '';
 
     status.textContent =
       `Filled ${data.industries.length} industries, ${data.job_titles.length} job titles, ` +
@@ -320,6 +337,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('next-btn').addEventListener('click', () => {
     console.log('Next clicked, current state:', JSON.parse(JSON.stringify(state)));
+  });
+
+  document.getElementById('years-input').addEventListener('input', (e) => {
+    state.yearsExperience = e.target.value === '' ? null : parseInt(e.target.value, 10);
+  });
+
+  document.getElementById('resume-file-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      document.getElementById('resume-textarea').value = reader.result;
+    };
+    reader.readAsText(file);
+
+    e.target.value = ''; // allow re-selecting the same file later
   });
 
   document.getElementById('autofill-btn').addEventListener('click', submitAutofill);

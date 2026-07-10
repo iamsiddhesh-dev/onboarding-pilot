@@ -368,6 +368,11 @@ body.mode-after .mode-caption {
   color: var(--text-muted);
 }
 
+.file-upload-label {
+  display: inline-flex;
+  align-items: center;
+}
+
 /* ---------- Warning text ---------- */
 
 .warning-text[hidden] {
