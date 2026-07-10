@@ -325,6 +325,10 @@ body.mode-after .mode-caption {
 /* ---------- Buttons ---------- */
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 600;
@@ -332,7 +336,7 @@ body.mode-after .mode-caption {
   padding: 0.6rem 1.1rem;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease, transform 0.05s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
 }
 
 .btn:active {
@@ -424,6 +428,10 @@ body.mode-after .mode-caption {
 /* ---------- Responsive ---------- */
 
 @media (max-width: 520px) {
+  #app {
+    padding: 1.5rem 1rem 3rem;
+  }
+
   .topbar {
     flex-direction: column;
     align-items: flex-start;
@@ -435,6 +443,34 @@ body.mode-after .mode-caption {
 
   .mode-btn {
     flex: 1;
+    text-align: center;
+  }
+
+  .card {
+    padding: 1.25rem;
+  }
+
+  /* Two pill buttons side by side don't fit a phone width without wrapping
+     their labels onto a second line — stack them full-width instead. */
+  .autofill-card .card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .autofill-card .btn {
+    width: 100%;
+  }
+
+  .card-actions--end {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .card-actions--end .btn {
+    width: 100%;
+  }
+
+  .autofill-status {
     text-align: center;
   }
 }
