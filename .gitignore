@@ -5,3 +5,9 @@ __pycache__/
 .env
 server.log
 node_modules/
+
+# Local-only docs — kept on disk for reference/prep, not published to GitHub.
+# Only README.md is public.
+BUGS.md
+ENGINEERING-NOTES.md
+outreach/
