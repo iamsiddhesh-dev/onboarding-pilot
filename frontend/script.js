@@ -375,17 +375,33 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSaveButton();
   });
 
-  document.getElementById('resume-file-input').addEventListener('change', (e) => {
+  document.getElementById('resume-file-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      document.getElementById('resume-textarea').value = reader.result;
-    };
-    reader.readAsText(file);
+    const status = document.getElementById('autofill-status');
+    status.textContent = 'Reading file...';
 
-    e.target.value = ''; // allow re-selecting the same file later
+    try {
+      // PDFs can't be read as plain text client-side, so any uploaded file
+      // (txt/md/pdf) is parsed server-side and comes back as plain text.
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/parse-resume-file', { method: 'POST', body: formData });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Request failed (${res.status})`);
+      }
+
+      const data = await res.json();
+      document.getElementById('resume-textarea').value = data.text;
+      status.textContent = 'File loaded — click "Autofill with AI" to extract.';
+    } catch (err) {
+      status.textContent = `Couldn't read file: ${err.message}`;
+    } finally {
+      e.target.value = ''; // allow re-selecting the same file later
+    }
   });
 
   document.getElementById('autofill-btn').addEventListener('click', submitAutofill);

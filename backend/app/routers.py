@@ -1,6 +1,8 @@
 import json
+from io import BytesIO
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from pypdf import PdfReader
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -50,6 +52,28 @@ def extract_profile_endpoint(payload: ExtractProfileRequest):
         years_experience=raw.get("years_experience"),
         skills=skills,
     )
+
+
+@router.post("/parse-resume-file")
+async def parse_resume_file(file: UploadFile = File(...)):
+    filename = (file.filename or "").lower()
+    content = await file.read()
+
+    if filename.endswith(".pdf"):
+        try:
+            reader = PdfReader(BytesIO(content))
+            text = "\n".join((page.extract_text() or "") for page in reader.pages).strip()
+        except Exception:
+            raise HTTPException(status_code=400, detail="Could not read this PDF. Try a different file.")
+        if not text:
+            raise HTTPException(status_code=400, detail="No extractable text found in this PDF (it may be a scanned image).")
+    else:
+        try:
+            text = content.decode("utf-8")
+        except UnicodeDecodeError:
+            raise HTTPException(status_code=400, detail="Could not read this file as text.")
+
+    return {"text": text}
 
 
 @router.post("/profiles", response_model=ProfileResponse)
