@@ -225,9 +225,16 @@ function addSkill(rawValue) {
   const value = rawValue.trim();
   if (!value) return;
 
-  if (state.mode === 'after' && state.skills.length >= SKILLS_CAP) {
-    renderSkillsState(); // surface the warning even if something tried to sneak past the disabled button
-    return;
+  if (state.mode === 'after') {
+    // fix: same duplicate-prevention the industries/job-titles dropdowns get,
+    // just case-insensitive since skills are free text, not a fixed list.
+    const isDuplicate = state.skills.some((t) => t.value.toLowerCase() === value.toLowerCase());
+    if (isDuplicate) return;
+
+    if (state.skills.length >= SKILLS_CAP) {
+      renderSkillsState(); // surface the warning even if something tried to sneak past the disabled button
+      return;
+    }
   }
 
   state.skills.push(makeTag(value));
