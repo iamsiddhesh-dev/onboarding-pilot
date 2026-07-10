@@ -8,8 +8,111 @@
 </head>
 <body>
     <div id="app">
-        <h1>GoodSpace Onboarding Copilot</h1>
-        <p>Loading...</p>
+
+        <header class="topbar">
+            <div class="brand">
+                <span class="brand-mark">GS</span>
+                <span class="brand-name">GoodSpace Onboarding Copilot</span>
+            </div>
+
+            <div class="mode-toggle" role="group" aria-label="Bug demo mode toggle">
+                <button type="button" id="mode-before-btn" class="mode-btn mode-btn--active" data-mode="before">
+                    🐛 Before (buggy)
+                </button>
+                <button type="button" id="mode-after-btn" class="mode-btn" data-mode="after">
+                    ✅ After (fixed)
+                </button>
+            </div>
+        </header>
+
+        <p class="mode-caption" id="mode-caption">
+            <strong>Before mode:</strong> reproduces the 3 real bugs found in the onboarding wizard —
+            duplicate tags, synchronized delete, and an unenforced skills cap. Toggle to
+            <strong>After</strong> to see the fix.
+        </p>
+
+        <main class="wizard-shell">
+
+            <!-- AI Autofill shell (UI only — wired in Task 4) -->
+            <section class="card autofill-card">
+                <h2 class="card-title">Autofill with AI</h2>
+                <p class="card-subtitle">Paste your resume or a short bio and let AI fill in the fields below.</p>
+                <textarea
+                    id="resume-textarea"
+                    class="textarea-input"
+                    rows="5"
+                    placeholder="Paste your resume or LinkedIn-style bio here..."
+                ></textarea>
+                <div class="card-actions">
+                    <button type="button" id="autofill-btn" class="btn btn-secondary">
+                        ✨ Autofill with AI
+                    </button>
+                    <span class="autofill-status" id="autofill-status"></span>
+                </div>
+            </section>
+
+            <!-- Main wizard step -->
+            <section class="card wizard-card">
+                <h2 class="card-title">Tell us about your work</h2>
+                <p class="card-subtitle">Step 2 of 3 &mdash; Industries, job titles &amp; skills</p>
+
+                <!-- Industries -->
+                <div class="field">
+                    <label class="field-label" for="industry-select">Industries</label>
+                    <select id="industry-select" class="select-input">
+                        <option value="" disabled selected>Select an industry&hellip;</option>
+                    </select>
+                    <div class="tag-list" id="industry-tags"></div>
+                </div>
+
+                <!-- Job Titles -->
+                <div class="field">
+                    <label class="field-label" for="jobtitle-select">Job Titles</label>
+                    <select id="jobtitle-select" class="select-input">
+                        <option value="" disabled selected>Select a job title&hellip;</option>
+                    </select>
+                    <div class="tag-list" id="jobtitle-tags"></div>
+                </div>
+
+                <!-- Skills -->
+                <div class="field">
+                    <label class="field-label" for="skills-input">
+                        Skills <span class="field-hint">(you can add up to 10 skills)</span>
+                    </label>
+                    <div class="input-row">
+                        <input
+                            type="text"
+                            id="skills-input"
+                            class="text-input"
+                            placeholder="e.g. Python, Figma, SQL..."
+                        />
+                        <button type="button" id="skills-add-btn" class="btn btn-primary">Add</button>
+                    </div>
+                    <p class="warning-text" id="skills-warning" hidden>
+                        You've reached the 10-skill limit. Remove a skill to add another.
+                    </p>
+                    <div class="tag-list" id="skills-tags"></div>
+                </div>
+
+                <div class="card-actions card-actions--end">
+                    <button type="button" id="next-btn" class="btn btn-primary btn-lg">Next</button>
+                </div>
+            </section>
+
+            <!-- Save Profile shell (UI only — wired in Task 4) -->
+            <section class="card save-card">
+                <h2 class="card-title">Save your profile</h2>
+                <div class="field">
+                    <label class="field-label" for="name-input">Name</label>
+                    <input type="text" id="name-input" class="text-input" placeholder="Your full name" />
+                </div>
+                <div class="card-actions">
+                    <button type="button" id="save-profile-btn" class="btn btn-secondary">Save Profile</button>
+                    <span class="autofill-status" id="save-status"></span>
+                </div>
+            </section>
+
+        </main>
     </div>
     <script src="script.js"></script>
 </body>
