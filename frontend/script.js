@@ -30,6 +30,7 @@ const state = {
   industries: [],
   jobTitles: [],
   skills: [],
+  yearsExperience: null,
 };
 
 function makeTag(value) {
@@ -205,21 +206,88 @@ function removeSkill(tag) {
   renderAll();
 }
 
-// ---------- Task 4 stubs (AI autofill + save profile) ----------
-// No backend wiring here on purpose — these are UI shells for Task 4.
+// ---------- AI autofill + save profile ----------
 
 async function submitAutofill() {
-  // TODO: wire in Task 4
-  // POST /api/extract-profile with { text: resumeTextarea.value }, then
-  // populate state.industries / state.jobTitles / state.skills from the
-  // response and call renderAll().
-  console.log('TODO: wire in Task 4 - submitAutofill()');
+  const textarea = document.getElementById('resume-textarea');
+  const status = document.getElementById('autofill-status');
+  const btn = document.getElementById('autofill-btn');
+  const text = textarea.value.trim();
+
+  if (!text) {
+    status.textContent = 'Paste some resume/bio text first.';
+    return;
+  }
+
+  btn.disabled = true;
+  status.textContent = 'Extracting...';
+
+  try {
+    const res = await fetch('/api/extract-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+
+    const data = await res.json();
+
+    // Route through the same add* functions manual selection uses, so
+    // autofilled tags obey the same before/after dedupe behavior.
+    (data.industries || []).forEach((value) => addIndustrySelection(value));
+    (data.job_titles || []).forEach((value) => addJobTitleSelection(value));
+    (data.skills || []).forEach((value) => addSkill(value));
+    state.yearsExperience = data.years_experience ?? null;
+
+    status.textContent =
+      `Filled ${data.industries.length} industries, ${data.job_titles.length} job titles, ` +
+      `${data.skills.length} skills.`;
+  } catch (err) {
+    status.textContent = `Autofill failed: ${err.message}`;
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 async function saveProfile() {
-  // TODO: wire in Task 4
-  // POST /api/profiles with { name, industries, job_titles, skills, years_experience }.
-  console.log('TODO: wire in Task 4 - saveProfile()');
+  const nameInput = document.getElementById('name-input');
+  const status = document.getElementById('save-status');
+  const btn = document.getElementById('save-profile-btn');
+  const name = nameInput.value.trim();
+
+  if (!name) {
+    status.textContent = 'Enter a name first.';
+    return;
+  }
+
+  const payload = {
+    name,
+    industries: state.industries.map((t) => t.value),
+    job_titles: state.jobTitles.map((t) => t.value),
+    years_experience: state.yearsExperience,
+    skills: state.skills.map((t) => t.value).slice(0, SKILLS_CAP),
+  };
+
+  btn.disabled = true;
+  status.textContent = 'Saving...';
+
+  try {
+    const res = await fetch('/api/profiles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+
+    const saved = await res.json();
+    status.textContent = `Saved as profile #${saved.id}.`;
+  } catch (err) {
+    status.textContent = `Save failed: ${err.message}`;
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ---------- Init ----------
