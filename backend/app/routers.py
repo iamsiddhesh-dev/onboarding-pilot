@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db import get_db
+from app.groq_client import extract_profile
 from app.models import Profile
-from app.schemas import ProfileCreate, ProfileResponse
+from app.schemas import ExtractProfileRequest, ExtractProfileResponse, ProfileCreate, ProfileResponse
 
 router = APIRouter(prefix="/api")
 
@@ -19,6 +20,35 @@ def _row_to_response(row: Profile) -> ProfileResponse:
         years_experience=row.years_experience,
         skills=json.loads(row.skills),
         created_at=row.created_at,
+    )
+
+
+def _dedupe_case_insensitive(values: list[str]) -> list[str]:
+    """Dedupe a list of strings case-insensitively, preserving the first-seen casing."""
+    seen: set[str] = set()
+    result: list[str] = []
+    for value in values:
+        key = value.strip().lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(value)
+    return result
+
+
+@router.post("/extract-profile", response_model=ExtractProfileResponse)
+def extract_profile_endpoint(payload: ExtractProfileRequest):
+    raw = extract_profile(payload.text)
+
+    industries = _dedupe_case_insensitive(list(raw.get("industries") or []))
+    job_titles = _dedupe_case_insensitive(list(raw.get("job_titles") or []))
+    skills = _dedupe_case_insensitive(list(raw.get("skills") or []))[:10]
+
+    return ExtractProfileResponse(
+        industries=industries,
+        job_titles=job_titles,
+        years_experience=raw.get("years_experience"),
+        skills=skills,
     )
 
 
