@@ -47,6 +47,27 @@ function makeTag(value) {
   return { instanceId: crypto.randomUUID(), value };
 }
 
+// ---------- Toast ----------
+
+function showToast(message) {
+  const container = document.getElementById('toast-container');
+
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  // Force reflow so the enter animation actually plays instead of the toast
+  // just appearing already in its final state.
+  void toast.offsetWidth;
+  toast.classList.add('toast--visible');
+
+  setTimeout(() => {
+    toast.classList.remove('toast--visible');
+    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+  }, 2400);
+}
+
 // ---------- Mode toggle ----------
 
 function setMode(mode) {
@@ -90,8 +111,15 @@ function renderAll() {
   renderTags('industry-tags', state.industries, removeIndustry);
   renderTags('jobtitle-tags', state.jobTitles, removeJobTitle);
   renderTags('skills-tags', state.skills, removeSkill);
+  renderEmptyHint('industry-empty-hint', state.industries);
+  renderEmptyHint('jobtitle-empty-hint', state.jobTitles);
+  renderEmptyHint('skills-empty-hint', state.skills);
   renderSkillsState();
   renderSaveButton();
+}
+
+function renderEmptyHint(hintId, list) {
+  document.getElementById(hintId).hidden = list.length > 0;
 }
 
 function renderSelectOptions(selectId, options, selectedList) {
@@ -179,6 +207,7 @@ function addIndustrySelection(value) {
   if (!value) return;
 
   if (state.mode === 'after' && state.industries.some((t) => t.value === value)) {
+    showToast(`"${value}" is already added`);
     return; // fix: already-selected options are disabled, this is just a safety net
   }
 
@@ -203,6 +232,7 @@ function addJobTitleSelection(value) {
   if (!value) return;
 
   if (state.mode === 'after' && state.jobTitles.some((t) => t.value === value)) {
+    showToast(`"${value}" is already added`);
     return;
   }
 
@@ -229,7 +259,10 @@ function addSkill(rawValue) {
     // fix: same duplicate-prevention the industries/job-titles dropdowns get,
     // just case-insensitive since skills are free text, not a fixed list.
     const isDuplicate = state.skills.some((t) => t.value.toLowerCase() === value.toLowerCase());
-    if (isDuplicate) return;
+    if (isDuplicate) {
+      showToast(`"${value}" is already in your skills`);
+      return;
+    }
 
     if (state.skills.length >= SKILLS_CAP) {
       renderSkillsState(); // surface the warning even if something tried to sneak past the disabled button

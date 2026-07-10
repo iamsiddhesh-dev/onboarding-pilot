@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="toast-container" aria-live="polite"></div>
     <div id="app">
 
         <header class="topbar">
@@ -62,44 +63,46 @@
 
                 <!-- Name -->
                 <div class="field">
-                    <label class="field-label" for="name-input">Name <span class="required-mark">*</span></label>
+                    <label class="field-label" for="name-input"><span class="field-icon">👤</span>Name <span class="required-mark">*</span></label>
                     <input type="text" id="name-input" class="text-input" placeholder="Your full name" />
                 </div>
 
                 <!-- Industries -->
                 <div class="field">
                     <label class="field-label" for="industry-select">
-                        Industries <span class="required-mark">*</span>
+                        <span class="field-icon">🏢</span>Industries <span class="required-mark">*</span>
                         <span class="field-hint">(industries you've previously worked in)</span>
                     </label>
                     <select id="industry-select" class="select-input">
                         <option value="" disabled selected>Select an industry&hellip;</option>
                     </select>
                     <div class="tag-list" id="industry-tags"></div>
+                    <p class="empty-hint" id="industry-empty-hint">No industries added yet</p>
                 </div>
 
                 <!-- Job Titles -->
                 <div class="field">
                     <label class="field-label" for="jobtitle-select">
-                        Desired Job Titles <span class="required-mark">*</span>
+                        <span class="field-icon">🎯</span>Desired Job Titles <span class="required-mark">*</span>
                         <span class="field-hint">(roles you're currently searching for)</span>
                     </label>
                     <select id="jobtitle-select" class="select-input">
                         <option value="" disabled selected>Select a job title&hellip;</option>
                     </select>
                     <div class="tag-list" id="jobtitle-tags"></div>
+                    <p class="empty-hint" id="jobtitle-empty-hint">No job titles added yet</p>
                 </div>
 
                 <!-- Years of Experience -->
                 <div class="field">
-                    <label class="field-label" for="years-input">Years of Experience <span class="required-mark">*</span></label>
+                    <label class="field-label" for="years-input"><span class="field-icon">📅</span>Years of Experience <span class="required-mark">*</span></label>
                     <input type="number" id="years-input" class="text-input" min="0" max="60" placeholder="e.g. 5" />
                 </div>
 
                 <!-- Skills -->
                 <div class="field">
                     <label class="field-label" for="skills-input">
-                        Skills <span class="required-mark">*</span>
+                        <span class="field-icon">🛠️</span>Skills <span class="required-mark">*</span>
                         <span class="field-hint">(technical skills only, up to 10 &mdash; e.g. Python, SQL, Docker)</span>
                     </label>
                     <div class="input-row">
@@ -117,6 +120,7 @@
                         You've reached the 10-skill limit. Remove a skill to add another.
                     </p>
                     <div class="tag-list" id="skills-tags"></div>
+                    <p class="empty-hint" id="skills-empty-hint">No skills added yet</p>
                 </div>
 
                 <div class="card-actions card-actions--end">

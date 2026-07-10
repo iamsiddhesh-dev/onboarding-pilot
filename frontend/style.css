@@ -40,6 +40,50 @@ body {
   padding: 2rem 1.5rem 4rem;
   max-width: 720px;
   margin: 0 auto;
+  animation: app-in 0.35s ease-out;
+}
+
+@keyframes app-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Toast ---------- */
+
+#toast-container {
+  position: fixed;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.toast {
+  background: #26303f;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.7rem 1.1rem;
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(20, 30, 50, 0.24);
+  opacity: 0;
+  transform: translateY(-10px) scale(0.97);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+
+.toast::before {
+  content: "👋 ";
+}
+
+.toast--visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 /* ---------- Top bar / mode toggle ---------- */
@@ -208,9 +252,21 @@ body.mode-after .mode-caption {
   color: var(--text-muted);
 }
 
+.field-icon {
+  margin-right: 0.35rem;
+}
+
 .required-mark {
   color: var(--danger);
   font-weight: 600;
+}
+
+.empty-hint {
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--text-muted);
+  opacity: 0.75;
+  margin-top: 0.6rem;
 }
 
 .select-input,
