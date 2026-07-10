@@ -270,6 +270,13 @@ async function submitAutofill() {
 
     const data = await res.json();
 
+    // Only fill the name if the user hasn't already typed one — autofill
+    // shouldn't clobber something they entered themselves.
+    const nameInput = document.getElementById('name-input');
+    if (data.name && !nameInput.value.trim()) {
+      nameInput.value = data.name;
+    }
+
     // Route through the same add* functions manual selection uses, so
     // autofilled tags obey the same before/after dedupe behavior.
     (data.industries || []).forEach((value) => addIndustrySelection(value));

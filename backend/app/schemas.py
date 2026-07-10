@@ -9,6 +9,7 @@ class ExtractProfileRequest(BaseModel):
 
 
 class ExtractProfileResponse(BaseModel):
+    name: Optional[str] = None
     industries: list[str] = Field(default_factory=list)
     job_titles: list[str] = Field(default_factory=list)
     years_experience: Optional[int] = None

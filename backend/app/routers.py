@@ -46,7 +46,9 @@ def extract_profile_endpoint(payload: ExtractProfileRequest):
     job_titles = _dedupe_case_insensitive(list(raw.get("job_titles") or []))
     skills = _dedupe_case_insensitive(list(raw.get("skills") or []))[:10]
 
+    name = raw.get("name")
     return ExtractProfileResponse(
+        name=name.strip() if isinstance(name, str) and name.strip() else None,
         industries=industries,
         job_titles=job_titles,
         years_experience=raw.get("years_experience"),

@@ -26,11 +26,15 @@ SYSTEM_PROMPT = (
     "summary), extract structured profile data. Respond with strict JSON "
     "only, matching exactly this shape:\n"
     "{\n"
+    '  "name": string or null,\n'
     '  "industries": [string, ...],\n'
     '  "job_titles": [string, ...],\n'
     '  "years_experience": integer or null,\n'
     '  "skills": [string, ...]\n'
     "}\n"
+    "- name: the person's full name, usually near the top of a resume/bio, "
+    "or null if it cannot be confidently identified (do not guess from an "
+    "email address or filename alone).\n"
     "- industries: the industries/sectors the person has worked in "
     "(e.g. \"Fintech\", \"Healthcare\").\n"
     "- job_titles: distinct job titles/roles held or implied.\n"
@@ -51,6 +55,7 @@ def _mock_response() -> dict:
     exercise it.
     """
     return {
+        "name": "Jordan Rivera",
         "industries": [
             "Fintech",
             "Healthcare",
@@ -95,6 +100,7 @@ def _call_groq(text: str, api_key: str) -> dict:
     content = completion.choices[0].message.content
     data = json.loads(content)
     return {
+        "name": data.get("name"),
         "industries": list(data.get("industries") or []),
         "job_titles": list(data.get("job_titles") or []),
         "years_experience": data.get("years_experience"),

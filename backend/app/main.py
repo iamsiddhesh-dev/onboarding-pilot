@@ -1,10 +1,16 @@
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.db import init_db
-from app.routers import router
+# Load .env before any app module reads an env var (e.g. db.py's DATABASE_URL,
+# groq_client.py's GROQ_API_KEY). Docker Compose injects env vars directly and
+# doesn't need this, but plain `uvicorn app.main:app` local runs do.
+load_dotenv(Path(__file__).parent.parent.parent / ".env")
+
+from app.db import init_db  # noqa: E402
+from app.routers import router  # noqa: E402
 
 app = FastAPI(title="Onboarding Copilot")
 
