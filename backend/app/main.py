@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from app.db import init_db
 from app.routers import router
 
-app = FastAPI(title="GoodSpace Onboarding Copilot")
+app = FastAPI(title="Onboarding Copilot")
 
 init_db()
 

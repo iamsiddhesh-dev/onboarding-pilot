@@ -14,6 +14,16 @@ const JOB_TITLE_OPTIONS = [
   'Solutions Architect', 'Customer Success Manager', 'Sales Engineer', 'Technical Writer',
 ];
 
+// Technical/hard skills only (no soft skills like "communication" or
+// "teamwork") — powers the native datalist typeahead on the skills input.
+const SKILL_SUGGESTIONS = [
+  'Python', 'PyTorch', 'TensorFlow', 'JavaScript', 'TypeScript', 'Java', 'C++', 'C#', 'Go', 'Rust',
+  'SQL', 'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'GraphQL', 'REST APIs',
+  'React', 'Vue', 'Node.js', 'Django', 'FastAPI', 'Flask',
+  'Docker', 'Kubernetes', 'AWS', 'GCP', 'Azure', 'CI/CD', 'Terraform', 'Linux',
+  'Git', 'Figma', 'A/B Testing', 'Data Analysis', 'Machine Learning', 'Pandas', 'NumPy',
+];
+
 const SKILLS_CAP = 10;
 
 // ---------- State ----------
@@ -81,7 +91,7 @@ function renderAll() {
   renderTags('jobtitle-tags', state.jobTitles, removeJobTitle);
   renderTags('skills-tags', state.skills, removeSkill);
   renderSkillsState();
-  renderNextButton();
+  renderSaveButton();
 }
 
 function renderSelectOptions(selectId, options, selectedList) {
@@ -144,12 +154,23 @@ function renderSkillsState() {
   input.disabled = atOrOverCap;
 }
 
-function renderNextButton() {
-  const nextBtn = document.getElementById('next-btn');
-  const overCap = state.skills.length > SKILLS_CAP;
-  // The bug: in "before" mode Next stays enabled no matter what.
-  // The fix: in "after" mode Next is blocked if skills ever end up over cap.
-  nextBtn.disabled = state.mode === 'after' && overCap;
+function renderSaveButton() {
+  const btn = document.getElementById('save-profile-btn');
+
+  // All fields are mandatory. The over-cap block mirrors the old "Next"
+  // button's fix-mode-only behavior: Before mode still lets you save over
+  // cap (that's the bug being demonstrated), After mode blocks it.
+  const overCapInAfterMode = state.mode === 'after' && state.skills.length > SKILLS_CAP;
+  const allFilled =
+    document.getElementById('name-input').value.trim() &&
+    state.industries.length > 0 &&
+    state.jobTitles.length > 0 &&
+    state.yearsExperience !== null &&
+    state.skills.length > 0;
+
+  btn.classList.remove('btn-success');
+  btn.textContent = 'Save Profile';
+  btn.disabled = !allFilled || overCapInAfterMode;
 }
 
 // ---------- Industries ----------
@@ -231,7 +252,7 @@ async function submitAutofill() {
   const text = textarea.value.trim();
 
   if (!text) {
-    status.textContent = 'Paste some resume/bio text first.';
+    status.textContent = 'Add your resume, a profile link, or a short bio first.';
     return;
   }
 
@@ -256,6 +277,7 @@ async function submitAutofill() {
     (data.skills || []).forEach((value) => addSkill(value));
     state.yearsExperience = data.years_experience ?? null;
     document.getElementById('years-input').value = state.yearsExperience ?? '';
+    renderSaveButton();
 
     status.textContent =
       `Filled ${data.industries.length} industries, ${data.job_titles.length} job titles, ` +
@@ -273,8 +295,11 @@ async function saveProfile() {
   const btn = document.getElementById('save-profile-btn');
   const name = nameInput.value.trim();
 
-  if (!name) {
-    status.textContent = 'Enter a name first.';
+  // The button is disabled whenever a mandatory field is missing, but guard
+  // here too in case this is ever called programmatically.
+  if (!name || state.industries.length === 0 || state.jobTitles.length === 0 ||
+      state.yearsExperience === null || state.skills.length === 0) {
+    status.textContent = 'Please fill in every field before saving.';
     return;
   }
 
@@ -298,11 +323,12 @@ async function saveProfile() {
 
     if (!res.ok) throw new Error(`Request failed (${res.status})`);
 
-    const saved = await res.json();
-    status.textContent = `Saved as profile #${saved.id}.`;
+    await res.json();
+    status.textContent = '';
+    btn.classList.add('btn-success');
+    btn.textContent = '✓ Saved';
   } catch (err) {
     status.textContent = `Save failed: ${err.message}`;
-  } finally {
     btn.disabled = false;
   }
 }
@@ -310,6 +336,13 @@ async function saveProfile() {
 // ---------- Init ----------
 
 document.addEventListener('DOMContentLoaded', () => {
+  const skillsDatalist = document.getElementById('skills-datalist');
+  SKILL_SUGGESTIONS.forEach((skill) => {
+    const opt = document.createElement('option');
+    opt.value = skill;
+    skillsDatalist.appendChild(opt);
+  });
+
   document.getElementById('mode-before-btn').addEventListener('click', () => setMode('before'));
   document.getElementById('mode-after-btn').addEventListener('click', () => setMode('after'));
 
@@ -335,12 +368,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.getElementById('next-btn').addEventListener('click', () => {
-    console.log('Next clicked, current state:', JSON.parse(JSON.stringify(state)));
-  });
+  document.getElementById('name-input').addEventListener('input', renderSaveButton);
 
   document.getElementById('years-input').addEventListener('input', (e) => {
     state.yearsExperience = e.target.value === '' ? null : parseInt(e.target.value, 10);
+    renderSaveButton();
   });
 
   document.getElementById('resume-file-input').addEventListener('change', (e) => {

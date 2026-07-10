@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "GoodSpace Onboarding Copilot",
-    "description": "REST API for the GoodSpace Onboarding Copilot demo — extract-profile (Groq-backed AI autofill) and profile persistence endpoints.",
+    "name": "Onboarding Copilot",
+    "description": "REST API for the Onboarding Copilot demo — extract-profile (Groq-backed AI autofill) and profile persistence endpoints.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
