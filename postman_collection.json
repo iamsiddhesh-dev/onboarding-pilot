@@ -1,0 +1,151 @@
+{
+  "info": {
+    "name": "GoodSpace Onboarding Copilot",
+    "description": "REST API for the GoodSpace Onboarding Copilot demo — extract-profile (Groq-backed AI autofill) and profile persistence endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "profileId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Extract profile from resume/bio text",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('skills length <= 10', () => pm.expect(body.skills.length).to.be.at.most(10));",
+              "pm.test('industries is an array', () => pm.expect(body.industries).to.be.an('array'));",
+              "pm.test('job_titles is an array', () => pm.expect(body.job_titles).to.be.an('array'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Senior product manager with 8 years of experience across fintech and healthcare. Skilled in roadmapping, SQL, A/B testing, stakeholder management, and Figma.\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/extract-profile",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "extract-profile"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create profile",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('has an id', () => pm.expect(body.id).to.be.a('number'));",
+              "pm.collectionVariables.set('profileId', body.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Jane Reviewer\",\n  \"industries\": [\"Fintech\", \"Healthcare\"],\n  \"job_titles\": [\"Product Manager\"],\n  \"years_experience\": 8,\n  \"skills\": [\"SQL\", \"Roadmapping\", \"Figma\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/profiles",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "profiles"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get profile by id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('id matches requested profile', () => pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('profileId')));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/profiles/{{profileId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "profiles", "{{profileId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get profile - not found",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/profiles/999999",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "profiles", "999999"]
+        }
+      },
+      "response": []
+    }
+  ]
+}

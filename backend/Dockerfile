@@ -2,10 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app/ ./app/
+COPY backend/app/ ./app/
+COPY frontend/ /frontend/
 
 ENV DATABASE_URL="sqlite:///./app.db"
 ENV GROQ_API_KEY=""
