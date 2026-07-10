@@ -252,7 +252,7 @@ async function submitAutofill() {
   const text = textarea.value.trim();
 
   if (!text) {
-    status.textContent = 'Add your resume, a profile link, or a short bio first.';
+    status.textContent = 'Upload your resume or introduce yourself first.';
     return;
   }
 
@@ -270,6 +270,10 @@ async function submitAutofill() {
 
     const data = await res.json();
 
+    // Autofill touches Name, Industries, and Skills. Job Titles and Years
+    // of Experience are picked by the user themselves — what role you're
+    // searching for isn't something AI should guess on your behalf.
+
     // Only fill the name if the user hasn't already typed one — autofill
     // shouldn't clobber something they entered themselves.
     const nameInput = document.getElementById('name-input');
@@ -277,18 +281,15 @@ async function submitAutofill() {
       nameInput.value = data.name;
     }
 
-    // Route through the same add* functions manual selection uses, so
+    // Route through the same add* functions manual entry uses, so
     // autofilled tags obey the same before/after dedupe behavior.
     (data.industries || []).forEach((value) => addIndustrySelection(value));
-    (data.job_titles || []).forEach((value) => addJobTitleSelection(value));
     (data.skills || []).forEach((value) => addSkill(value));
-    state.yearsExperience = data.years_experience ?? null;
-    document.getElementById('years-input').value = state.yearsExperience ?? '';
-    renderSaveButton();
+    renderSaveButton(); // in case both came back empty, the name change still needs to be reflected
 
-    status.textContent =
-      `Filled ${data.industries.length} industries, ${data.job_titles.length} job titles, ` +
-      `${data.skills.length} skills.`;
+    status.textContent = data.name
+      ? `Filled name, ${data.industries.length} industries, and ${data.skills.length} skills.`
+      : `Filled ${data.industries.length} industries and ${data.skills.length} skills.`;
   } catch (err) {
     status.textContent = `Autofill failed: ${err.message}`;
   } finally {
